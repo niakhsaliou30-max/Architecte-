@@ -1,0 +1,194 @@
+<!DOCTYPE html><html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz de Math Pro</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
+    }.container {
+  width: 95%;
+  max-width: 520px;
+  background: rgba(0,0,0,0.75);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+  text-align: center;
+}
+
+h1 { margin-bottom: 10px; }
+
+select, button {
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn:hover { transform: scale(1.05); }
+
+.correct { background: #28a745; color: white; }
+.wrong { background: #dc3545; color: white; }
+
+#nextBtn, #restartBtn {
+  background: #007bff;
+  color: white;
+  display: none;
+}
+
+#timer {
+  font-size: 18px;
+  margin: 10px 0;
+}
+
+#progress {
+  height: 10px;
+  background: #444;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+#bar {
+  height: 10px;
+  width: 0%;
+  background: #00ffcc;
+  border-radius: 5px;
+  transition: 0.3s;
+}
+
+  </style>
+</head>
+<body><div class="container">  <div id="startScreen">
+    <h1>Quiz de Math 🎯</h1>
+    <p>Choisis un niveau :</p>
+    <select id="level">
+      <option value="easy">Facile</option>
+      <option value="medium">Moyen</option>
+      <option value="hard">Difficile</option>
+    </select>
+    <button onclick="startQuiz()">Commencer</button>
+  </div>  <div id="quiz" style="display:none;">
+    <div id="timer">Temps : 10</div>
+    <div id="progress"><div id="bar"></div></div><h2 id="question"></h2>
+<div id="answers"></div>
+
+<button id="nextBtn" onclick="nextQuestion()">Suivant</button>
+<button id="restartBtn" onclick="location.reload()">Recommencer</button>
+
+<p id="score"></p>
+
+  </div></div><script>
+const questions = {
+  easy: [
+    {q:"5 + 3 ?", a:["6","8","10","9"], c:"8"},
+    {q:"2 + 2 ?", a:["3","4","5","6"], c:"4"},
+    {q:"10 - 5 ?", a:["3","4","5","6"], c:"5"}
+  ],
+  medium: [
+    {q:"12 x 2 ?", a:["22","24","26","20"], c:"24"},
+    {q:"15 - 7 ?", a:["6","7","8","9"], c:"8"},
+    {q:"9 x 3 ?", a:["27","24","21","30"], c:"27"}
+  ],
+  hard: [
+    {q:"25 x 4 ?", a:["100","90","110","120"], c:"100"},
+    {q:"144 ÷ 12 ?", a:["10","11","12","13"], c:"12"},
+    {q:"18 x 6 ?", a:["108","98","118","128"], c:"108"}
+  ]
+};
+
+let level, quiz, index = 0, score = 0, time = 10, interval;
+
+function startQuiz() {
+  level = document.getElementById("level").value;
+  quiz = questions[level];
+
+  document.getElementById("startScreen").style.display = "none";
+  document.getElementById("quiz").style.display = "block";
+
+  loadQuestion();
+}
+
+function loadQuestion() {
+  clearInterval(interval);
+  time = 10;
+
+  document.getElementById("nextBtn").style.display = "none";
+  document.getElementById("answers").innerHTML = "";
+
+  let q = quiz[index];
+  document.getElementById("question").innerText = q.q;
+
+  document.getElementById("bar").style.width = ((index/quiz.length)*100)+"%";
+
+  q.a.sort(() => Math.random() - 0.5);
+
+  q.a.forEach(ans => {
+    let btn = document.createElement("button");
+    btn.innerText = ans;
+    btn.className = "btn";
+    btn.onclick = () => selectAnswer(btn, q.c);
+    document.getElementById("answers").appendChild(btn);
+  });
+
+  interval = setInterval(() => {
+    time--;
+    document.getElementById("timer").innerText = "Temps : " + time;
+    if(time == 0) {
+      clearInterval(interval);
+      nextQuestion();
+    }
+  }, 1000);
+}
+
+function selectAnswer(btn, correct) {
+  let buttons = document.querySelectorAll(".btn");
+
+  buttons.forEach(b => {
+    b.disabled = true;
+    if(b.innerText == correct) b.classList.add("correct");
+    else b.classList.add("wrong");
+  });
+
+  if(btn.innerText == correct) score++;
+
+  document.getElementById("nextBtn").style.display = "block";
+  document.getElementById("score").innerText = "Score : " + score;
+}
+
+function nextQuestion() {
+  index++;
+
+  if(index < quiz.length) {
+    loadQuestion();
+  } else {
+    document.getElementById("question").innerText = "Quiz terminé 🎉";
+    document.getElementById("answers").innerHTML = "";
+    document.getElementById("timer").style.display = "none";
+    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("restartBtn").style.display = "block";
+    document.getElementById("bar").style.width = "100%";
+    document.getElementById("score").innerText = "Score final : " + score + " / " + quiz.length;
+  }
+}
+</script></body>
+</html>
